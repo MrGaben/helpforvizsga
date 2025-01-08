@@ -1,0 +1,9 @@
+-- CreateTable
+CREATE TABLE `Car` (
+    `CarID` INTEGER NOT NULL AUTO_INCREMENT,
+    `Model` VARCHAR(191) NOT NULL,
+    `Year` INTEGER NOT NULL,
+    `Manufacturer` VARCHAR(191) NOT NULL,
+
+    PRIMARY KEY (`CarID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
