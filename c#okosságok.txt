@@ -1,0 +1,754 @@
+using ConsoleApp1.Models;
+
+namespace ConsoleApp1
+{
+
+
+    public class Program
+    {
+        // Létrehozza az adatbázist a user táblával
+        private static void InitializeDatabase()
+        {
+            using (var db = new UserDbContext())
+            {
+                db.Database.EnsureCreated();
+                Console.WriteLine("Adatbázis inicializálva.");
+            }
+        }
+        private static void AddUser()
+        {
+            using (var db = new UserDbContext())
+            {
+                Console.Write("Lastname:");
+                string lname = Console.ReadLine();
+                Console.Write("Firstname:");
+                string fname = Console.ReadLine();
+                var user = new User(fname, lname);
+                /*
+                var user = new User();
+                user.Id = 1;
+                user.FirstName = "Test";
+                user.LastName = "Test1";
+                */
+                db.Users.Add(user);
+                db.SaveChanges();
+                Console.WriteLine("Felhasználó hozzáadva");
+            }
+        }
+        private static void ListUsers()
+        {
+            using (var db = new UserDbContext())
+            {
+                var users = db.Users.ToList();
+                if (users.Count == 0)
+                {
+                    Console.WriteLine("Nincsenek adatok!");
+                    return;
+                }
+                Console.WriteLine("\nFelhasználók listája:");
+                foreach (var user in users)
+                {
+                    Console.WriteLine($"{user.LastName} {user.FirstName}");
+                }
+            }
+        }
+            static void Main(string[] args)
+            {
+                Console.WriteLine("1. Adatbázis inicializálása");
+                Console.WriteLine("2. Új felhasználó felvitele");
+                Console.WriteLine("3. felhasználók listája");
+                Console.WriteLine("4. Kilépés");
+                Console.WriteLine("Válasszon 1,2,3,4 közül... ");
+           
+            bool menu = true;
+            while (menu)
+            {
+                string valasz = Console.ReadLine();
+                switch (valasz)
+                {
+                    case "1":
+                        InitializeDatabase();
+                        break;
+                    case "2":
+                        AddUser();
+                        break;
+                    case "3":
+                        ListUsers();
+                        break;
+                    case "4":
+                        menu = false;
+                        break;
+                }
+            }
+                using (var db = new UserDbContext())
+                {
+                    db.Database.EnsureCreated();
+                }
+
+            }
+    }
+}
+_________________________________________________________________________
+
+
+
+using MySqlConnector;
+namespace ConsoleApp1
+{
+    public class Program
+    {
+       
+        static void Main(string[] args)
+        {
+            try
+            {
+                string connstr = "server = localhost; database = ingatlan; user = root;";
+                using (MySqlConnection conn = new MySqlConnection(connstr))
+                {
+                    conn.Open();
+                    Console.WriteLine("sikeres.");
+                    string selectQ = "SELECT `ingatlanok`.*, `kategoriak`.`nev` FROM `kategoriak` inner JOIN `ingatlanok` ON `ingatlanok`.`kategoria` = `kategoriak`.`id`";
+                    using (MySqlCommand cmd = new MySqlCommand(selectQ,conn))
+                    {
+                        using(MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read()) 
+                            {
+                                Console.WriteLine($"Id:{reader["id"]}, Leiras: {reader["leiras"]}");
+                            }
+                        }
+                    }
+                    string insertQ = "INSERT INTO `ingatlanok`(`kategoria`, `leiras`, `hirdertesDatuma`, `tehermentes`, `ar`, `kepUrl`) VALUES (1, \"asc\" , now() ,true,25100,'https://fazsom')";
+                    using (MySqlCommand cmd = new MySqlCommand(insertQ, conn))
+                    {
+                        int rowIn = cmd.ExecuteNonQuery();
+                        Console.WriteLine($"{rowIn} sor benne van");
+                    }
+                    string updateQ = "UPDATE `ingatlanok` SET ar = ar + 5000000 WHERE id = 9";
+                    using(MySqlCommand updatecomm = new MySqlCommand(updateQ, conn))
+                    {
+                        int rowsUpd = updatecomm.ExecuteNonQuery();
+                        Console.WriteLine($"{rowsUpd} done and dusted");
+                    }
+                    string deleteQ = "DELETE FROM `ingatlanok` WHERE id = 10";
+                    using (MySqlCommand deletecmd = new MySqlCommand(deleteQ, conn))
+                    {
+                        int rowDel = deletecmd.ExecuteNonQuery();
+                        Console.WriteLine($"{rowDel} done and dusted");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Hiba: {ex.Message}");
+            }
+        }
+    }
+}
+________________________________________________________________
+
+
+
+
+
+using ConsoleApp1.Models;
+namespace ConsoleApp1
+{
+    public class Program
+    {
+        // Létrehozza az adatbázist a user táblával
+        private static void InitializeDatabase()
+        {
+            using (var db = new AppDbContext()) 
+{
+                db.Database.EnsureCreated();
+                Console.WriteLine(" Adatbázis inicializálva.");
+            }
+        }
+        private static void AddCustomer()
+        {
+            using (var db = new AppDbContext()) 
+{
+                Console.Write( "Name: ");
+                string name = Console.ReadLine();
+                Console.Write("eamil: ");
+                string email = Console.ReadLine();
+                var customer = new Customer(name,email);
+                /*
+                var user = new User();
+                user.Id = 1;
+                user.FirstName = &quot;Test&quot;;
+                user.LastName = &quot;Test1&quot;;
+                */
+                db.Customer.Add(customer);
+                db.SaveChanges();
+                Console.WriteLine(" Felhasználó hozzáadva");
+            }
+        }
+    private static void ListCustomers()
+        {
+            using (var db = new AppDbContext()) 
+{
+                var customers = db.Customer.ToList();
+                if (customers.Count == 0)
+                {
+                    Console.WriteLine( "Nincsenek adatok");
+                    return;
+                }
+                Console.WriteLine("\nFelhasználók listája:");
+                foreach (var customer in customers)
+                {
+                    Console.WriteLine($"{ customer.Name}");
+                }
+            }
+        }
+        private static void AddOrder()
+        {
+            using (var db = new AppDbContext())
+            {
+                Console.Write("ProName: ");
+                string proname = Console.ReadLine();
+                Console.WriteLine("CustomerID: ");
+                int custid = Convert.ToInt32(Console.ReadLine());
+                var ordername = new Orders(proname,custid);
+                db.Orders.Add(ordername);
+                db.SaveChanges();
+                Console.WriteLine("Rendelés hozzáadva");
+            }
+        }
+        private static void ListOrder()
+        {
+            using (var db = new AppDbContext())
+            {
+                var orders = db.Orders.ToList();
+                if (orders.Count == 0)
+                {
+                    Console.WriteLine("Nincsenek adatok");
+                    return;
+                }
+                Console.WriteLine("\nRendelések listája:");
+                foreach (var order in orders)
+                {
+                    Console.WriteLine($"{order.ProductName} {order.CustomerId}");
+                }
+            }
+        }
+        static void Main(string[] args)
+        {
+            Console.WriteLine( "1.Adatbázis inicializálása");
+            Console.WriteLine( "2.Új felhasználó felvitele");
+            Console.WriteLine( "3.Új rendelés felvitele");
+            Console.WriteLine( "4.Felhasználók listája;");
+            Console.WriteLine( "5.Rendelések listája;");
+            Console.WriteLine( "6.Kilépés");
+            Console.WriteLine(" Válasszon:  ");
+            bool menu = true;
+            while (menu)
+            {
+                string valasz = Console.ReadLine();
+                switch (valasz)
+                {
+                    case  "1":
+                        InitializeDatabase();
+                        break;
+                    case  "2" :
+                        AddCustomer();
+                        break;
+                    case  "3" :
+                        AddOrder();
+                        break;
+                    case "4":
+                        ListCustomers();
+                        break;
+                    case  "5":
+                        ListOrder();
+                        break;
+                    case "6":
+                        menu = false;
+                        break;
+                }
+            }
+            using (var db = new AppDbContext())
+            {
+                db.Database.EnsureCreated();
+            }
+        }
+    }
+}
+_______________________________________________________________________
+
+
+using System;
+using System.Security.Cryptography.X509Certificates;
+using ConsoleApp1.Models;
+
+namespace ConsoleApp1
+{
+    internal class Program
+    {
+        public static void InitializeDatabase()
+        {
+            using (var db = new UserDbContext())
+            {
+                db.Database.EnsureCreated();
+                Console.Write("nem megy ez a ");
+            }
+        }
+        public static void AddUser(int id, string newFirst, string NewLast)
+        {
+            using (var db = new UserDbContext())
+            {
+                var users = new User(id, newFirst, NewLast);
+                db.User.Add(users);
+                db.SaveChanges();
+                Console.WriteLine("Bepatinttva");
+            }
+        }
+        public static void ListUser()
+        {
+            using (var db = new UserDbContext())
+            {
+                var users = db.User.ToList();
+                if(users.Count == 0)
+                {
+                    Console.WriteLine("nem");
+                    return;
+                }
+                Console.WriteLine("\n Felhasználók:");
+                foreach (var user in users)
+                {
+                    Console.WriteLine($"{user.LastName} {user.FirstName}");
+                }
+            }
+        }
+        static void Main(string[] args)
+        {
+            Console.WriteLine("1.create");
+            Console.WriteLine("2.add");
+            Console.WriteLine("3.list");
+            Console.WriteLine("4.exit");
+            bool menu = true;
+            int valasz = int.Parse(Console.ReadLine());
+            switch(valasz)
+            {
+                case 1:
+                    InitializeDatabase();
+                    break;
+                case 2:
+                    Console.Write("ID:");
+                    int id = int.Parse(Console.ReadLine());
+                    Console.WriteLine("Firstname:");
+                    string first = Console.ReadLine();
+                    Console.WriteLine("Lastname:");
+                    string last = Console.ReadLine();
+                    AddUser(id, first, last);
+                    break;
+                case 3:
+                    ListUser();
+                    break;
+                case 4:
+                    menu = false;
+                    break;
+            }
+            using (var db = new UserDbContext()) 
+            {
+                db.Database.EnsureCreated();
+            }
+        }
+    }
+}
+______________________________________________________________________
+
+
+Unittest : 
+namespace today.TestProject1 
+{
+    public class Tests
+{
+        Diak diak = new Diak(17);
+        [SetUp]
+    public void Setup()
+    {
+
+    }
+
+    [Test]
+    public void Test1()
+    {
+        
+            Assert.IsTrue(diak.felnott_e());
+            //Assert.IsFalse(diak.felnott_e());
+    }
+        [Test]
+        public void Test2()
+        {
+            Assert.GreaterOrEqual(diak.oregszik(),18);
+        }
+        [Test]
+        public void Test3()
+        {
+            var result = diak.felnott_e();
+            Assert.That(result, Is.True, "Még gyerek");
+            
+        }
+
+
+        [TestCase(17)]
+
+        public void test4(int value)
+        {
+
+            Assert.Less(diak.vizvalaszt(value), 0);
+
+        }
+        [TestCase(19)]
+
+        public void test5(int value)
+        {
+
+            Assert.Greater(diak.vizvalaszt(value), 0);
+
+        }
+        [TestCase(18)]
+
+        public void test6(int value)
+        {
+
+            Assert.Zero(diak.vizvalaszt(value));
+
+        }
+    }
+}
+_________________________________________________________
+
+
+namespace today
+{
+    public class Diak
+    {
+        int eletkor { get; set; }
+        public Diak(int szam)
+        {
+            this.eletkor = szam;
+        }
+        public bool felnott_e()
+        {
+            if (eletkor >= 18)
+            {
+                return true;
+            }
+            return false;
+        }
+        public int oregszik()
+        {
+            eletkor += 1;
+            return eletkor;
+        }
+        public int vizvalaszt(int value)
+        {
+            if (value > 18)
+                return 1;
+            else if (value == 18)
+                return 0;
+            else if (value < 18)
+                return -1;
+
+            return -1;
+        }
+        internal class Program
+        {
+            static void Main(string[] args)
+            {
+                Console.WriteLine("Szeva");
+            }
+        }
+    }
+}
+
+___________________________________________________________________________
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+
+namespace RealEstate
+{
+    internal class Program
+    {
+        class Category
+        {
+            public Category() { }
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public Category(int id, string name)
+            {
+                this.Id = id;
+                this.Name = name;
+            }
+        }
+
+        class Seller
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string Phone { get; set; }
+            public Seller(int id, string name, string phone)
+            {
+                this.Id = id;
+                this.Name = name;
+                this.Phone = phone;
+            }
+        }
+        class Ad
+        {
+            public int Area { get; set; }
+            Category Category { get; set; }
+            DateTime CreateAt { get; set; }
+            string Description { get; set; }
+            public int Floors { get; set; }
+            public bool FreeOfCharge { get; set; }
+            int Id { get; set; }
+            string ImageUrl { get; set; }
+            string LatLong { get; set; }
+            public int Rooms { get; set; }
+            public Seller seller { get; set; }
+            public Ad(string adatok)
+            {
+                // id;rooms;latlong;floors;area;description;freeOfCharge;
+                // imageUrl;createAt;sellerId;sellerName;sellerPhone;categoryId;categoryName
+
+                string[] sor = adatok.Split(';');
+                this.Id = int.Parse(sor[0]);
+                this.Rooms = int.Parse(sor[1]);
+                this.LatLong = sor[2];
+                this.Floors = int.Parse(sor[3]);
+                this.Area = int.Parse(sor[4]);
+                this.Description = sor[5];
+                if (sor[6] == "0")
+                {
+                    this.FreeOfCharge = false;
+                }
+                else
+                {
+                    this.FreeOfCharge = true;
+                }
+                this.ImageUrl = sor[7];
+                this.CreateAt = Convert.ToDateTime(sor[8]);
+                this.seller = new Seller(int.Parse(sor[9]), sor[10], sor[11]);
+                this.Category = new Category(int.Parse(sor[12]), sor[11]);
+
+            }
+
+            public double DistanceTo(string latlong)
+            {
+                string[] lt = this.LatLong.Split(',');
+                string[] lt1 = latlong.Split(',');
+                return Math.Sqrt(Math.Pow((Convert.ToDouble(lt[0].Replace('.', ',')) - Convert.ToDouble(lt1[0].Replace('.', ','))), 2) + Math.Pow((Convert.ToDouble(lt[1].Replace('.', ',')) - Convert.ToDouble(lt1[1].Replace('.', ','))), 2));
+            }
+            public static List<Ad> LoadFromCsv(string FileName)
+            {
+                List<Ad> list = new List<Ad>();
+                string[] sorok = File.ReadAllLines(FileName);
+                for (int i = 1; i < sorok.Length; i++)
+                {
+                    list.Add(new Ad(sorok[i]));
+                }
+                return list;
+            }
+
+        }
+
+
+        static void Main(string[] args)
+        {
+            List<Ad> ads = new List<Ad>();
+            ads = Ad.LoadFromCsv("realestates.csv");
+            int osszTerulet = 0;
+            int db = 0;
+            foreach (Ad ad in ads)
+            {
+                if (ad.Floors == 0)
+                {
+                    osszTerulet += ad.Area;
+                    db++;
+                }
+            }
+            double tavolsag = double.MaxValue;
+            int index = -1;
+            string mesevarLatLong = "47.4164220114023,19.066342425796986";
+            for (int i = 1; i < ads.Count; i++)
+            {
+                if (ads[i].FreeOfCharge == true)
+                {
+                    if (ads[i].DistanceTo(mesevarLatLong) < tavolsag)
+                    {
+                        tavolsag = ads[i].DistanceTo(mesevarLatLong);
+                        index = i;
+                    }
+
+                }
+            }
+            Console.WriteLine("1. Földszinti ingatlanok átlagos alapterülete: {0:#.##} m2", (double)osszTerulet / db);
+            Console.WriteLine("2. Mesevár óvodához légvonalban legközelebbi tehermentes ingatlan adatai: ");
+            Console.WriteLine("\tEladó neve     : " + ads[index].seller.Name);
+            Console.WriteLine("\tEladó telefonja: " + ads[index].seller.Phone);
+            Console.WriteLine("\tAlapterület    : " + ads[index].Area);
+            Console.WriteLine("\tSzobák száma   : " + ads[index].Rooms.ToString());
+            
+
+            Console.ReadKey();
+        }
+    }
+}
+_________________________________________________
+
+Unitest:
+using NUnit.Framework;
+using Prime;
+
+namespace Tests
+{
+    [TestFixture]
+    public class PrimeSimple
+    {
+        private PrimeTools _sut;
+
+        [SetUp]
+        public void Setup()
+        {
+            _sut = new PrimeTools();
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            _sut = null;
+        }
+
+        [Test]
+        public void TestThat_0_IsnotPrime()
+        {
+            //act
+            bool result = _sut.IsPrime(0);
+            //assert
+            Assert.That(result, Is.False);
+            Assert.IsFalse(result);
+        }
+    }
+}
+____________________________________________________
+
+using System.Runtime.CompilerServices;
+[assembly: InternalsVisibleTo("TestProject1")]
+namespace Prime
+{ 
+    class AD
+    {
+        static void Main(string[] args)
+        {
+
+        }
+    }
+    internal class PrimeTools
+    {
+        public bool IsPrime(int number)
+        {
+            for (int i = 2; i < number; i++)
+            {
+                if (number % 2 == 0) return false;
+            }
+            return true;
+        }
+    }
+
+    
+}
+____________________________________________________
+
+Unitest:
+using NUnit.Framework;
+using Prime;
+
+namespace Tests
+{
+    [TestFixture]
+    public class PrimeSimple
+    {
+        private PrimeTools _sut;
+
+        [SetUp]
+        public void Setup()
+        {
+            _sut = new PrimeTools();
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            _sut = null;
+        }
+
+        [Test]
+        public void TestThat_0_IsnotPrime()
+        {
+            //act
+            bool result = _sut.IsPrime(6);
+            //assert
+            Assert.That(result, Is.False);
+            Assert.IsFalse(result);
+        }
+
+        [TestFixture]
+        public class PrimeTests
+        {
+            [TestCase(-1, false)]
+            [TestCase(0, false)]
+            [TestCase(1, false)]
+            [TestCase(2, true)]
+            [TestCase(3, true)]
+            [TestCase(997, true)]
+
+            public void TestThat_IsPrime_Returns_CorrectResult(int input, bool expected)
+            {
+                var prime = new PrimeTools();
+                bool result = prime.IsPrime(input);
+                Assert.AreEqual(expected, result);
+            }
+        }
+        [TestFixture]
+        public class TestCaseSource
+        {
+            public static IEnumerable<TestCaseData> TestCases
+            {
+                get
+                {
+                    yield return new TestCaseData(-1, false);
+                    yield return new TestCaseData(0, false);
+                    yield return new TestCaseData(1, false);
+                    yield return new TestCaseData(2, true);
+                    yield return new TestCaseData(3, true);
+                    yield return new TestCaseData(997, true);
+
+                }
+            }
+
+            [TestCaseSource(nameof(TestCases))]
+            public void TestThat_IsPrime_Returns_CorrectResult(int input, bool expected)
+            {
+                var prime = new PrimeTools();
+                bool result = prime.IsPrime(input);
+                Assert.AreEqual(expected, result);
+            }
+        }
+        [Test, Pairwise]
+        public void MyTest(
+        [Values("a", "b", "c")] string a,
+        [Values("+", "-")] string b,
+        [Values("x", "y")] string c)
+        {
+            Console.WriteLine("{0} {1} {2}", a, b, c);
+        }
+    }
+}
