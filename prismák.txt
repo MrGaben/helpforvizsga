@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model kategoriak{
+  id Int @id @default(autoincrement())
+  nev String @unique
+  Ingatlanok ingatlanok[]
+}
+
+model ingatlanok {
+  id Int @id @default(autoincrement())
+  kategoria Int
+  leiras String
+  hirdertesDatuma DateTime @default(now())
+  tehermentes Boolean @default(true)
+  ar Int 
+  kepUrl String
+  kategoriak kategoriak @relation(fields: [kategoria], references: [id])
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model clients {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  Order Order[]
+}
+
+model Order {
+  id       Int     @id @default(autoincrement())
+  clientId Int
+  cost     Int
+  clients  clients @relation(fields: [clientId], references: [id])
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model kategoriak{
+  id Int @id @default(autoincrement())
+  nev String @unique
+  Ingatlanok ingatlanok[]
+}
+
+model ingatlanok {
+  id Int @id @default(autoincrement())
+  kategoria Int
+  leiras String
+  hirdertesDatuma DateTime @default(now())
+  tehermentes Boolean @default(true)
+  ar Int 
+  kepUrl String
+  kategoriak kategoriak @relation(fields: [kategoria], references: [id])
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Reader{
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  books Book[] @relation("Readerbook")
+}
+model Book{
+  id Int @id @default(autoincrement())
+  title String @unique
+  author String
+  readerId Int
+  reader Reader @relation("Readerbook", fields: [readerId], references: [id])
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+model Car {
+  CarID Int @id @default(autoincrement())
+  Model String 
+  Year Int
+  Manufacturer String
+}
+
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  password String
+  name String
+  createdAt DateTime @default(now())
+}
