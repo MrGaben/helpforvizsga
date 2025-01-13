@@ -1,0 +1,60 @@
+CREATE TRIGGER `CapitalizeName` BEFORE INSERT ON `users`
+ FOR EACH ROW SET NEW.name = UPPER(NEW.name)
+
+CREATE TRIGGER `LogOldData` BEFORE UPDATE ON `users`
+ FOR EACH ROW INSERT INTO user_logs (action, user_id, log_time, old_data)
+    VALUES ('UPDATE', OLD.id, NOW(), CONCAT('Name: ', OLD.name, ', Email: ', OLD.email))
+
+CREATE TRIGGER `LogNewUser` AFTER INSERT ON `users`
+ FOR EACH ROW INSERT INTO user_logs (action, user_id, log_time) VALUES ('INSERT', NEW.id, NOW())
+
+CREATE TRIGGER `LogDeletedUser` AFTER DELETE ON `users`
+ FOR EACH ROW INSERT INTO user_logs (action, user_id, log_time, old_data) VALUES ('DELETE', OLD.id, NOW(), CONCAT('Name: ', OLD.name, ', Email: ', OLD.email))
+
+
+
+
+
+
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteUser`(IN `userId` INT)
+DELETE FROM users WHERE id = userId$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetUserCount`() RETURNS int(11)
+RETURN (SELECT COUNT(*) FROM users)$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetUserCreationDate`(`userId` INT(11)) RETURNS datetime
+RETURN (SELECT created_at FROM users WHERE id = userId)$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetUserFullName`(`userId` INT) RETURNS varchar(512) CHARSET utf8mb4 COLLATE utf8mb4_hungarian_ci
+RETURN (SELECT CONCAT(name, ' (', email, ')') FROM users WHERE id = userId)$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetUsers`()
+SELECT * FROM users$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `NewUser`(IN `UserName` VARCHAR(255), IN `UserEmail` VARCHAR(255))
+INSERT INTO users (name, email) VALUES (userName, userEmail)$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateUser`(IN `userId` INT, IN `userName` VARCHAR(255), IN `userEmail` VARCHAR(255))
+UPDATE users
+    SET name = userName, email = userEmail
+    WHERE id = userId$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` FUNCTION `UserExistsByEmail`(`userEmail` VARCHAR(255)) RETURNS tinyint(1)
+RETURN EXISTS (SELECT 1 FROM users WHERE email = userEmail)$$
+DELIMITER ;
